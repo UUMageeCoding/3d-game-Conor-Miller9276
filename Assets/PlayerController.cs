@@ -38,7 +38,7 @@ public class ThirdPersonController : MonoBehaviour
         Cursor.visible = false;
     }
     
-    private void Update()
+    private void FixedUpdate()
     {
         // Check if character is grounded
         groundedPlayer = controller.isGrounded;
