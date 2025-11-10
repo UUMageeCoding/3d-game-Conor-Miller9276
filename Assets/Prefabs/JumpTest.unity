@@ -746,7 +746,7 @@ GameObject:
   - component: {fileID: 520771996}
   - component: {fileID: 520771995}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Footpath_Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1098,7 +1098,7 @@ GameObject:
   - component: {fileID: 667023343}
   - component: {fileID: 667023342}
   m_Layer: 0
-  m_Name: Cube (2)
+  m_Name: Footpath_Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1499,7 +1499,7 @@ GameObject:
   - component: {fileID: 900705746}
   - component: {fileID: 900705745}
   m_Layer: 0
-  m_Name: Sprite
+  m_Name: Road
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1701,7 +1701,7 @@ GameObject:
   - component: {fileID: 951063039}
   - component: {fileID: 951063038}
   m_Layer: 0
-  m_Name: Cube (1)
+  m_Name: Building?
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
