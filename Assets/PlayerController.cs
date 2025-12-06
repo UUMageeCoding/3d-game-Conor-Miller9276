@@ -1,10 +1,11 @@
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class ThirdPersonController : MonoBehaviour
 {
     // Character controller component
     private CharacterController controller;
-    private Camera mainCamera;
+    private Camera firstPersonCamera;
     
     // Movement parameters
     [Header("Movement Settings")]
@@ -14,31 +15,37 @@ public class ThirdPersonController : MonoBehaviour
     
     // Jump parameters
     [Header("Jump Settings")]
-    [SerializeField] private float jumpHeight = 1f;
+    [SerializeField] private float jumpHeight = 2f;
     [SerializeField] private float gravityValue = -9.81f;
     [SerializeField] private float fallMultiplier = 2.5f;
+
+    public float MaxSlopeAngle = 40f;
+    private RaycastHit slopeHit;
+
     
     // State variables
     private Vector3 playerVelocity;
     private bool groundedPlayer;
     private Transform cameraTransform;
+
+    public bool teleport = false;
     
     private void Start()
     {
         controller = GetComponent<CharacterController>();
-        mainCamera = Camera.main;
+        firstPersonCamera = Camera.main;
         
-        if (mainCamera != null)
+        if (firstPersonCamera != null)
         {
-            cameraTransform = mainCamera.transform;
+            cameraTransform = firstPersonCamera.transform;
         }
         
         // Lock and hide cursor for camera control
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
-    
-    private void FixedUpdate()
+
+    private void Update()
     {
         // Check if character is grounded
         groundedPlayer = controller.isGrounded;
@@ -46,11 +53,11 @@ public class ThirdPersonController : MonoBehaviour
         {
             playerVelocity.y = -0.5f; // Small downward force to ensure grounding
         }
-        
+
         // Get input for movement
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
-        
+
         // Calculate movement direction relative to camera
         Vector3 direction = Vector3.zero;
         if (cameraTransform != null)
@@ -62,7 +69,7 @@ public class ThirdPersonController : MonoBehaviour
             right.y = 0;
             forward.Normalize();
             right.Normalize();
-            
+
             direction = forward * vertical + right * horizontal;
         }
         else
@@ -70,31 +77,38 @@ public class ThirdPersonController : MonoBehaviour
             // Fallback if camera reference isn't available
             direction = new Vector3(horizontal, 0.0f, vertical);
         }
-        
+
         // Normalize movement vector to prevent faster diagonal movement
         if (direction.magnitude > 1f)
         {
             direction.Normalize();
         }
-        
-        // Handle character rotation to face movement direction
+        /*// Handle character rotation to face movement direction
         if (direction != Vector3.zero)
         {
             // Calculate rotation to face movement direction
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        }
-        
-        // Apply movement with appropriate speed
-        float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
-        controller.Move(direction * Time.deltaTime * currentSpeed);
-        
-        // Handle jumping
-        if (Input.GetButtonDown("Jump") && groundedPlayer)
+        }*/
+
+        if (OnSlope())
         {
-            playerVelocity.y = Mathf.Sqrt(jumpHeight * -2.0f * gravityValue);
+            direction = Vector3.ProjectOnPlane(direction, slopeHit.normal).normalized;
+        }
+
+        // Apply movement with appropriate speed
+        if (teleport == false)
+        {
+            float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
+            controller.Move(direction * Time.deltaTime * currentSpeed);
+        }
+        else if (teleport == true)
+        {
         }
         
+
+        // Handle jumping
+
         // Apply gravity with enhanced falling
         if (playerVelocity.y < 0)
         {
@@ -106,8 +120,21 @@ public class ThirdPersonController : MonoBehaviour
             // Standard gravity for rising
             playerVelocity.y += gravityValue * Time.deltaTime;
         }
-        
+
         // Apply vertical movement
         controller.Move(playerVelocity * Time.deltaTime);
+
+        
+    }
+
+    private bool OnSlope()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, 1.7f))
+        {
+            float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
+            return angle < MaxSlopeAngle && angle != 0;
+        }
+
+        return false;
     }
 }
